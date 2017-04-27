@@ -1,7 +1,10 @@
 package com.joern.dummies.gitdummy;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +19,32 @@ public class App {
 
     public static void main(String... args ){
 
-        new App().gitSome();
+        new App().gitSome(args);
     }
 
-    public void gitSome(){
+    public void gitSome(String... args){
 
-        String checkoutPath = "C:\\dev\\tmp\\gitdummypuppy";
+        String gitUser = args[0];
+        String gitPswd = args[1];
+        String gitRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
+        String gitWorkDir = PropertyReader.readProperty("git.local.workDir");
+        String gitBranch = PropertyReader.readProperty("git.branch");
 
+        if(StringUtils.isBlank(gitRepoUrl) || StringUtils.isBlank(gitWorkDir) || StringUtils.isBlank(gitBranch)){
+            l.error("Failed to start git client due to invalid config");
+            return;
+        }
 
         try {
-            Git git = Git.cloneRepository()
-                    .setURI( "https://github.com/GilbertGiesbert/GitDummyPuppy.git" )
-                    .setDirectory( new File(checkoutPath) )
-                    .call();
+            CloneCommand cc = Git.cloneRepository()
+                    .setURI( gitRepoUrl )
+                    .setDirectory( new File(gitWorkDir) )
+                    .setBranch(gitBranch);
+
+            if(StringUtils.isNotBlank(gitUser) && StringUtils.isNotBlank(gitPswd)){
+                cc.setCredentialsProvider( new UsernamePasswordCredentialsProvider( gitUser, gitPswd ) );
+            }
+            Git git =  cc.call();
 
         } catch (GitAPIException e) {
             l.error("Failed to git clone", e);
