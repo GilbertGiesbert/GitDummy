@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -24,12 +23,12 @@ public class PropertyReader {
             initProperties();
         }
 
+        String value = null;
         if(properties.containsKey(key)){
-            return properties.get(key).toString();
-        }else{
-            l.debug("No property for key "+key);
-            return null;
+            value = properties.get(key).toString();
         }
+        l.debug("read property: "+key+"="+value);
+        return value;
     }
 
     private static void initProperties(){
@@ -58,7 +57,6 @@ public class PropertyReader {
                 }
             }
         }
-
         PropertyReader.properties = properties;
     }
 }
