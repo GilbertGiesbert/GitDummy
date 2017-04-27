@@ -15,12 +15,15 @@ public class App {
     public static void main(String... args){
 
         String gitUser = args[0];
-        String gitPswd = args[1];
+        String gitPassword = args[1];
 
-        new App().useGit(gitUser, gitPswd);
+        new App().useGit(gitUser, gitPassword);
     }
 
-    public void useGit(String gitUser, String gitPswd){
+    public void useGit(String gitUser, String gitPassword){
+
+        l.debug("gitUser="+gitUser);
+        l.debug("gitPassword not blank="+StringUtils.isNotBlank(gitPassword));
 
         String gitRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
         String gitWorkDir = PropertyReader.readProperty("git.local.workDir");
@@ -39,7 +42,7 @@ public class App {
             // GitUtil.pull(localRepo);
 
             GitUtil.commit(localRepo);
-            GitUtil.push(localRepo, gitUser, gitPswd);
+            GitUtil.push(localRepo, gitUser, gitPassword);
         }
     }
 }

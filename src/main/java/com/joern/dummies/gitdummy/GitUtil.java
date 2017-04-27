@@ -53,7 +53,7 @@ public class GitUtil {
         }
     }
 
-    public static void push(Repository localRepo, String gitUser, String gitPswd){
+    public static void push(Repository localRepo, String gitUser, String gitPassword){
 
         if(localRepo == null){
             l.error("Failed to git push, missing local repo.");
@@ -62,8 +62,8 @@ public class GitUtil {
 
         Git git = new Git(localRepo);
         PushCommand push = git.push();
-        if(StringUtils.isNotBlank(gitUser) && StringUtils.isNotBlank(gitPswd)){
-            push.setCredentialsProvider( new UsernamePasswordCredentialsProvider( gitUser, gitPswd ) );
+        if(StringUtils.isNotBlank(gitUser) && StringUtils.isNotBlank(gitPassword)){
+            push.setCredentialsProvider( new UsernamePasswordCredentialsProvider( gitUser, gitPassword ) );
         }
         try {
             push.call();
