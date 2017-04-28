@@ -4,11 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,11 @@ public class GitUtil {
 
     private static final Logger l = LoggerFactory.getLogger(GitUtil.class);
 
-    public static void clone(String remoteRepoUrl, String localRepoPath, String branch){
+    public static final String FILE_PATTERN_STAGE_ALL = ".";
+
+    public static boolean clone(String remoteRepoUrl, String localRepoPath, String branch){
+
+        boolean success = true;
 
         try {
             CloneCommand clone = Git.cloneRepository()
@@ -34,44 +41,60 @@ public class GitUtil {
 
         } catch (GitAPIException e) {
             l.error("Failed to git clone", e);
+            success = false;
         }
+
+        return success;
     }
 
-    public static void pull(Git git){
+    public static boolean pull(Git git){
+
+        boolean success = true;
 
         PullCommand pull = git.pull();
         try {
             pull.call();
         } catch (GitAPIException e) {
             l.error("Failed to git pull", e);
+            success = false;
         }
+        return success;
     }
 
-    public static void push(Git git, String gitUser, String gitPassword){
+    public static boolean push(Git git, String user, String password){
+
+        boolean success = true;
 
         PushCommand push = git.push();
-        if(StringUtils.isNotBlank(gitUser) && StringUtils.isNotBlank(gitPassword)){
-            push.setCredentialsProvider( new UsernamePasswordCredentialsProvider( gitUser, gitPassword ) );
+        if(StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password)){
+            push.setCredentialsProvider( new UsernamePasswordCredentialsProvider( user, password ) );
         }
         try {
             push.call();
         } catch (GitAPIException e) {
             l.error("Failed to git pull", e);
+            success = false;
         }
+        return success;
     }
 
 
-    public static void commit(Git git){
+    public static boolean stage(String filePattern, Git git){
 
-        String addAll = ".";
+        boolean success = true;
+
         try {
-            git.add().addFilepattern(addAll).call();
+            git.add().addFilepattern(filePattern).call();
         } catch (GitAPIException e) {
-            l.error("Failed to git commit, can't add files to stage", e);
+            l.error("Failed to git add, check filePattern="+filePattern, e);
+            success = false;
         }
+        return success;
+    }
 
-        CommitCommand commit = git.commit();
-        commit.setMessage("java commit at "+TimeStamp.stamp());
+    public static void commit(String commitMessage, Git git){
+
+        CommitCommand commit = git.commit().setMessage(commitMessage);
         try {
             commit.call();
         } catch (GitAPIException e) {
@@ -98,5 +121,63 @@ public class GitUtil {
             return null;
         }
         return new Git(localRepo);
+    }
+
+    public static boolean branch(String branchName, Git git){
+
+        boolean success = true;
+
+        try {
+            git.branchCreate().setName(branchName).call();
+        } catch (GitAPIException e) {
+            l.error("Failed to create branch '"+branchName+"'", e);
+            success = false;
+        }
+        return success;
+    }
+
+    public static boolean checkout(String branchName, Git git){
+
+        boolean success = true;
+
+        try {
+            git.checkout().setName(branchName).call();
+        } catch (GitAPIException e) {
+            l.error("Failed to checkout branch '"+branchName+"'", e);
+            success = false;
+        }
+        return success;
+    }
+
+    public static boolean mergeTheirs(String theirBranchName, String mergeMessage, Git git){
+
+        boolean success = true;
+        String currentBranch = null;
+
+        try {
+
+            Repository repository = git.getRepository();
+            currentBranch = repository.getBranch();
+
+            Ref ref = repository.findRef(theirBranchName);
+            MergeCommand merge = git.merge().setStrategy(MergeStrategy.THEIRS).include(ref);
+            if(StringUtils.isNotBlank(mergeMessage)){
+                merge.setMessage(mergeMessage);
+            }
+            merge.call();
+
+        } catch (IOException | GitAPIException e) {
+            l.error("Failed to merge branch "+theirBranchName + " into " + currentBranch, e);
+            success = false;
+        }
+        return success;
+    }
+
+
+    // TODO
+    public static boolean deleteBranch(String branchName, Git git){
+
+        l.error("not implemented: deleteBranch()");
+        return false;
     }
 }

@@ -2,7 +2,6 @@ package com.joern.dummies.gitdummy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,8 @@ public class App {
         String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
         String localRepoPath = PropertyReader.readProperty("git.local.repoPath");
 
-        new App().useGit(user, password, remoteRepoUrl, localRepoPath);
+        App app = new App();
+        app.useGit(user, password, remoteRepoUrl, localRepoPath);
     }
 
     public void useGit(String user, String password, String remoteRepoUrl, String localRepoPath){
@@ -34,8 +34,53 @@ public class App {
 
             // GitUtil.pull(git);
 
-            GitUtil.commit(git);
+            // GitUtil.commit(git);
+            // GitUtil.push(git, user, password);
+
+            /*
+            String configFile = localRepoPath+"/src/main/resources/puppyprops/config.proprties";
+            FileEdit.editFileContent(configFile, "develop", false);
+
+            String newBranch = "javaBranch_"+TimeStamp.stamp(new Date(), "yyyyMMdd_HHmmss");
+            GitUtil.branch(newBranch, git);
+            */
+
+            // GitUtil.checkout("develop", git);
+
+            // GitUtil.merge("worker", git);
+
+
+            //-----------------------------------
+
+            String featureBranch = "myFeature";
+            String developBranch = "develop";
+            String configFile = localRepoPath+"/src/main/resources/puppyprops/config.properties";
+
+
+
+            // make feature changes and push
+            GitUtil.branch(featureBranch, git);
+            GitUtil.checkout(featureBranch, git);
+            FileEdit.editFileContent(configFile, featureBranch+" branch was here", true);
+            GitUtil.stage(GitUtil.FILE_PATTERN_STAGE_ALL, git);
+            GitUtil.commit(featureBranch+" changes", git);
             GitUtil.push(git, user, password);
+
+
+            // make develop changes and push
+            GitUtil.checkout(developBranch, git);
+            FileEdit.editFileContent(configFile, developBranch+" branch was here", true);
+            GitUtil.stage(GitUtil.FILE_PATTERN_STAGE_ALL, git);
+            GitUtil.commit(developBranch+" changes", git);
+            GitUtil.push(git, user, password);
+
+            // merge feature into develop while feature is lead
+            // and push
+            GitUtil.mergeTheirs(featureBranch, null, git);
+            GitUtil.push(git, user, password);
+
+
         }
     }
+
 }
