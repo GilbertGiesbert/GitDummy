@@ -98,16 +98,13 @@ public class GitUtil {
         }
     }
 
-    public static Repository getLocalRepository(){
+    public static Repository getLocalRepository(String pathToLocalRepo){
 
-        String gitWorkDir = PropertyReader.readProperty("git.local.workDir");
-
-        Repository localRepo = null;
         try {
-            localRepo = new FileRepository(gitWorkDir + "/.git");
+            return new FileRepository(pathToLocalRepo + "/.git");
         } catch (IOException e) {
-            l.error("Failed to access local repo", e);
+            l.error("Failed to access local repo, check path="+pathToLocalRepo, e);
+            return null;
         }
-        return localRepo;
     }
 }

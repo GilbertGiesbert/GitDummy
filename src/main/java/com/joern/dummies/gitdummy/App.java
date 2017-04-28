@@ -14,35 +14,27 @@ public class App {
 
     public static void main(String... args){
 
-        String gitUser = args[0];
-        String gitPassword = args[1];
+        String user = args[0];
+        String password = args[1];
+        l.debug("gitUser="+user);
+        l.debug("gitPassword not blank="+StringUtils.isNotBlank(password));
+        String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
+        String localRepoPath = PropertyReader.readProperty("git.local.repoPath");
 
-        new App().useGit(gitUser, gitPassword);
+        new App().useGit(user, password, remoteRepoUrl, localRepoPath);
     }
 
-    public void useGit(String gitUser, String gitPassword){
+    public void useGit(String user, String password, String remoteRepoUrl, String localRepoPath){
 
-        l.debug("gitUser="+gitUser);
-        l.debug("gitPassword not blank="+StringUtils.isNotBlank(gitPassword));
+        // GitUtil.clone(gitRepoUrl, localRepoPath, "develop");
 
-        String gitRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
-        String gitWorkDir = PropertyReader.readProperty("git.local.workDir");
-        String gitBranch = PropertyReader.readProperty("git.branch");
-
-        if(StringUtils.isBlank(gitRepoUrl) || StringUtils.isBlank(gitWorkDir) || StringUtils.isBlank(gitBranch)){
-            l.error("Failed to use git, missing some config");
-            return;
-        }
-
-        // GitUtil.clone(gitRepoUrl, gitWorkDir, gitBranch);
-
-        Repository localRepo = GitUtil.getLocalRepository();
+        Repository localRepo = GitUtil.getLocalRepository(localRepoPath);
         if(localRepo != null){
 
             // GitUtil.pull(localRepo);
 
             GitUtil.commit(localRepo);
-            GitUtil.push(localRepo, gitUser, gitPassword);
+            GitUtil.push(localRepo, user, password);
         }
     }
 }
