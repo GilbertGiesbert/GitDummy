@@ -11,7 +11,7 @@ public class TimeStamp {
     public static String stamp(){
 
         Date date = new Date();
-        String dateFormat = "yyyy.MM.dd - hh:mm:ss";
+        String dateFormat = "yyyy.MM.dd - HH:mm:ss";
         return stamp(date, dateFormat);
     }
 
