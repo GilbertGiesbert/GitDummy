@@ -1,6 +1,7 @@
 package com.joern.dummies.gitdummy;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +27,15 @@ public class App {
 
     public void useGit(String user, String password, String remoteRepoUrl, String localRepoPath){
 
-        // GitUtil.clone(gitRepoUrl, localRepoPath, "develop");
+        // GitUtil.clone(remoteRepoUrl, localRepoPath, "develop");
 
-        Repository localRepo = GitUtil.getLocalRepository(localRepoPath);
-        if(localRepo != null){
+        Git git = GitUtil.getGit(localRepoPath);
+        if(git != null){
 
-            // GitUtil.pull(localRepo);
+            // GitUtil.pull(git);
 
-            GitUtil.commit(localRepo);
-            GitUtil.push(localRepo, user, password);
+            GitUtil.commit(git);
+            GitUtil.push(git, user, password);
         }
     }
 }

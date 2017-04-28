@@ -23,13 +23,13 @@ public class GitUtil {
 
     private static final Logger l = LoggerFactory.getLogger(GitUtil.class);
 
-    public static void clone(String gitRepoUrl, String gitWorkDir, String gitBranch){
+    public static void clone(String remoteRepoUrl, String localRepoPath, String branch){
 
         try {
             CloneCommand clone = Git.cloneRepository()
-                    .setURI( gitRepoUrl )
-                    .setDirectory( new File(gitWorkDir) )
-                    .setBranch(gitBranch);
+                    .setURI( remoteRepoUrl )
+                    .setDirectory( new File(localRepoPath) )
+                    .setBranch(branch);
             clone.call();
 
         } catch (GitAPIException e) {
@@ -37,14 +37,8 @@ public class GitUtil {
         }
     }
 
-    public static void pull(Repository localRepo){
+    public static void pull(Git git){
 
-        if(localRepo == null){
-            l.error("Failed to git pull, missing local repo.");
-            return;
-        }
-
-        Git git = new Git(localRepo);
         PullCommand pull = git.pull();
         try {
             pull.call();
@@ -53,14 +47,8 @@ public class GitUtil {
         }
     }
 
-    public static void push(Repository localRepo, String gitUser, String gitPassword){
+    public static void push(Git git, String gitUser, String gitPassword){
 
-        if(localRepo == null){
-            l.error("Failed to git push, missing local repo.");
-            return;
-        }
-
-        Git git = new Git(localRepo);
         PushCommand push = git.push();
         if(StringUtils.isNotBlank(gitUser) && StringUtils.isNotBlank(gitPassword)){
             push.setCredentialsProvider( new UsernamePasswordCredentialsProvider( gitUser, gitPassword ) );
@@ -73,16 +61,9 @@ public class GitUtil {
     }
 
 
-    public static void commit(Repository localRepo){
+    public static void commit(Git git){
 
-        if(localRepo == null){
-            l.error("Failed to git commit, missing local repo.");
-            return;
-        }
-
-        Git git = new Git(localRepo);
         String addAll = ".";
-
         try {
             git.add().addFilepattern(addAll).call();
         } catch (GitAPIException e) {
@@ -106,5 +87,16 @@ public class GitUtil {
             l.error("Failed to access local repo, check path="+pathToLocalRepo, e);
             return null;
         }
+    }
+
+    public static Git getGit(String pathToLocalRepo){
+
+        Repository localRepo = getLocalRepository(pathToLocalRepo);
+
+        if(localRepo == null){
+            l.error("Failed to get git , missing local repo.");
+            return null;
+        }
+        return new Git(localRepo);
     }
 }
