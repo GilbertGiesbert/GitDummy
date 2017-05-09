@@ -18,7 +18,9 @@ public class App {
         String password = args[1];
         l.debug("gitUser="+user);
         l.debug("gitPassword not blank="+StringUtils.isNotBlank(password));
-        String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl");
+        // doesn't matter if url is https or ssh
+        // String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.https");
+        String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.ssh");
         String localRepoPath = PropertyReader.readProperty("git.local.repoPath");
 
         App app = new App();
