@@ -19,15 +19,15 @@ public class App {
         l.debug("gitUser="+user);
         l.debug("gitPassword not blank="+StringUtils.isNotBlank(password));
         // doesn't matter if url is https or ssh
-        // String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.https");
-        String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.ssh");
+        String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.https");
+        // String remoteRepoUrl = PropertyReader.readProperty("git.remote.repoUrl.ssh");
         String localRepoPath = PropertyReader.readProperty("git.local.repoPath");
 
         App app = new App();
-        app.useGit(user, password, remoteRepoUrl, localRepoPath);
+        app.gitExample(user, password, remoteRepoUrl, localRepoPath);
     }
 
-    public void useGit(String user, String password, String remoteRepoUrl, String localRepoPath){
+    public void gitExample(String user, String password, String remoteRepoUrl, String localRepoPath){
 
         // GitUtil.clone(remoteRepoUrl, localRepoPath, "develop");
 
@@ -51,8 +51,20 @@ public class App {
 
             // GitUtil.merge("worker", git);
 
+        }
+    }
 
-            //-----------------------------------
+
+    /*
+        make concurrent changes in feature and develop
+        merge feature into develop
+        overriding develop with feature
+     */
+    public void gitExample1(String user, String password, String remoteRepoUrl, String localRepoPath) {
+
+
+        Git git = GitUtil.getGit(localRepoPath);
+        if (git != null) {
 
             String featureBranch = "myFeature";
             String developBranch = "develop";
@@ -80,7 +92,6 @@ public class App {
             // and push
             GitUtil.mergeTheirs(featureBranch, null, git);
             GitUtil.push(git, user, password);
-
 
         }
     }
